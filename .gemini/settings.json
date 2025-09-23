@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "servicenow": {
+      "command": "",
+      "args": [
+        "python3 -m servicenow_mcp.cli"
+      ],
+      "trust": true,
+      "description": "Servidor MCP para interagir com o ServiceNow"
+    }
+  }
+}

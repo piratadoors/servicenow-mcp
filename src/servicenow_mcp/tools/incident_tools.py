@@ -22,6 +22,8 @@ class CreateIncidentParams(BaseModel):
     short_description: str = Field(..., description="Short description of the incident")
     description: Optional[str] = Field(None, description="Detailed description of the incident")
     caller_id: Optional[str] = Field(None, description="User who reported the incident")
+    opened_by: Optional[str] = Field(None, description="User who opened the incident")
+    sc_cat_item_producer: Optional[str] = Field(None, description="Service catalog item producer")
     category: Optional[str] = Field(None, description="Category of the incident")
     subcategory: Optional[str] = Field(None, description="Subcategory of the incident")
     priority: Optional[str] = Field(None, description="Priority of the incident")
@@ -71,10 +73,11 @@ class ListIncidentsParams(BaseModel):
     
     limit: int = Field(10, description="Maximum number of incidents to return")
     offset: int = Field(0, description="Offset for pagination")
+    display_value: bool = Field(True, description="Return display values for reference fields.")
     state: Optional[str] = Field(None, description="Filter by incident state")
     assigned_to: Optional[str] = Field(None, description="Filter by assigned user")
     category: Optional[str] = Field(None, description="Filter by category")
-    query: Optional[str] = Field(None, description="Search query for incidents")
+    query: Optional[str] = Field(None, description="A ServiceNow encoded query string for filtering incidents. Overrides other filter parameters if provided.")
 
 
 class GetIncidentByNumberParams(BaseModel):
@@ -119,6 +122,10 @@ def create_incident(
         data["description"] = params.description
     if params.caller_id:
         data["caller_id"] = params.caller_id
+    if params.opened_by:
+        data["opened_by"] = params.opened_by
+    if params.sc_cat_item_producer:
+        data["sc_cat_item_producer"] = params.sc_cat_item_producer
     if params.category:
         data["category"] = params.category
     if params.subcategory:
@@ -478,21 +485,22 @@ def list_incidents(
     query_params = {
         "sysparm_limit": params.limit,
         "sysparm_offset": params.offset,
-        "sysparm_display_value": "true",
+        "sysparm_display_value": str(params.display_value).lower(),
         "sysparm_exclude_reference_link": "true",
     }
     
     # Add filters
     filters = []
+    if params.query:
+        filters.append(params.query)
+    
     if params.state:
         filters.append(f"state={params.state}")
     if params.assigned_to:
         filters.append(f"assigned_to={params.assigned_to}")
     if params.category:
         filters.append(f"category={params.category}")
-    if params.query:
-        filters.append(f"short_descriptionLIKE{params.query}^ORdescriptionLIKE{params.query}")
-    
+
     if filters:
         query_params["sysparm_query"] = "^".join(filters)
     
