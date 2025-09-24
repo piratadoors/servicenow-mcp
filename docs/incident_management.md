@@ -14,6 +14,21 @@ Retrieves a list of incidents from ServiceNow.
 
 **Resource Name:** `incidents`
 
+**Fields Returned:**
+- `sys_id` (string)
+- `number` (string)
+- `short_description` (string)
+- `description` (string)
+- `state` (string)
+- `priority` (string)
+- `assigned_to` (string)
+- `assignment_group` (string)
+- `category` (string)
+- `subcategory` (string)
+- `u_record_producer` (string, Note: This field indicates the record producer that created the incident. For example, 'Zabbix Monitoring'.)
+- `created_on` (string)
+- `updated_on` (string)
+
 **Parameters:**
 - `limit` (int, default: 10): Maximum number of incidents to return
 - `offset` (int, default: 0): Offset for pagination
