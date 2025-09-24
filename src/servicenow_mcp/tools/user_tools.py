@@ -133,6 +133,14 @@ class ListGroupsParams(BaseModel):
     type: Optional[str] = Field(None, description="Filter by group type")
 
 
+class ListGroupMembersParams(BaseModel):
+    """Parameters for listing group members."""
+
+    group_id: str = Field(..., description="Group ID or sys_id")
+    limit: int = Field(100, description="Maximum number of members to return")
+    offset: int = Field(0, description="Offset for pagination")
+
+
 class UserResponse(BaseModel):
     """Response from user operations."""
 
@@ -149,6 +157,72 @@ class GroupResponse(BaseModel):
     message: str = Field(..., description="Message describing the result")
     group_id: Optional[str] = Field(None, description="ID of the affected group")
     group_name: Optional[str] = Field(None, description="Name of the affected group")
+
+
+def list_group_members(
+    config: ServerConfig,
+    auth_manager: AuthManager,
+    params: ListGroupMembersParams,
+) -> dict:
+    """
+    List members of a group in ServiceNow.
+    """
+    # First, get the sys_id of the group if a name is provided
+    group_id = params.group_id
+    if not all(c in "0123456789abcdef" for c in group_id) or len(group_id) != 32:
+        # It's a name, not a sys_id, so get the sys_id
+        group_info = list_groups(config, auth_manager, ListGroupsParams(query=params.group_id))
+        if group_info.get("success") and group_info.get("groups"):
+            found_group = None
+            for group in group_info["groups"]:
+                if group.get("name") == params.group_id:
+                    found_group = group
+                    break
+            
+            if found_group:
+                group_id = found_group.get("sys_id")
+            else:
+                return {"success": False, "message": f"Group '{params.group_id}' not found."}
+        else:
+            return {"success": False, "message": f"Group '{params.group_id}' not found."}
+    api_url = f"{config.api_url}/table/sys_user_grmember"
+    query_params = {
+        "sysparm_query": f"group={group_id}",
+        "sysparm_limit": str(params.limit),
+        "sysparm_offset": str(params.offset),
+        "sysparm_display_value": "true",
+    }
+
+    try:
+        response = requests.get(
+            api_url,
+            params=query_params,
+            headers=auth_manager.get_headers(),
+            timeout=config.timeout,
+        )
+        response.raise_for_status()
+
+        result = response.json().get("result", [])
+        
+        members = []
+        for member_data in result:
+            user_info = member_data.get("user", {})
+            members.append({
+                "user_name": user_info.get("display_value"),
+                "user_sys_id": user_info.get("value")
+            })
+
+        return {
+            "success": True,
+            "message": f"Found {len(members)} members in group",
+            "members": members,
+        }
+
+    except requests.RequestException as e:
+        logger.error(f"Failed to list group members: {e}")
+        return {"success": False, "message": f"Failed to list group members: {str(e)}"}
+
+
 
 
 def create_user(
