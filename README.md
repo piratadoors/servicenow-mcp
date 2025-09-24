@@ -1,4 +1,3 @@
-
 # ServiceNow MCP Server
 
 A Model Context Protocol (MCP) server implementation for ServiceNow, allowing AI assistants like Gemini to interact with ServiceNow instances.
@@ -83,6 +82,22 @@ Use the `run_list_incidents.py` script to list incidents. The `--query` paramete
 python3 run_list_incidents.py --query "state=1" --display-value false
 ```
 
+**Example 3: Counting Open Requests**
+Use the `request_cli.py` script to count open requests.
+
+```bash
+# Count all open requests (state not in 3, 4, 7)
+python3 request_cli.py count --query "stateNOT IN3,4,7"
+```
+
+**Example 4: Getting User Details by Email**
+Use the `user_cli.py` script to retrieve user information.
+
+```bash
+# Get user details for a specific email
+python3 user_cli.py get-user --email "user.email@example.com"
+```
+
 You can create new client scripts for any of the available tools listed later in this README.
 
 ## Project Structure
@@ -92,10 +107,17 @@ You can create new client scripts for any of the available tools listed later in
 ├── .env.example          # Example credentials file
 ├── create_incident_cli.py  # CLIENT: Script to create incidents
 ├── run_list_incidents.py   # CLIENT: Script to list incidents
+├── count_incidents.py      # CLIENT: Script to count incidents
+├── list_groups_cli.py      # CLIENT: Script to list groups
+├── request_cli.py          # CLIENT: Script for request management
+├── user_cli.py             # CLIENT: Script for user and group management
 ├── src/
 │   └── servicenow_mcp/
 │       ├── cli.py          # SERVER: Main entry point for the MCP server
 │       └── tools/          # Implementations of all available tools
+│           ├── incident_tools.py # Incident management tools
+│           ├── request_tools.py  # Request management tools
+│           └── user_tools.py     # User and group management tools
 └── README.md             # This file
 ```
 
@@ -103,13 +125,28 @@ You can create new client scripts for any of the available tools listed later in
 
 **Note:** The availability of the following tools depends on the loaded tool package (see Tool Packaging section below). By default (`full` package), all tools are available. You can create a `*_cli.py` script for any of them.
 
-#### Incident Management Tools
+#### Incident Management Tools (via `run_list_incidents.py`, `create_incident_cli.py`, `count_incidents.py`)
 
-1. **create_incident** - Create a new incident in ServiceNow
-2. **update_incident** - Update an existing incident in ServiceNow
-3. **add_comment** - Add a comment to an incident in ServiceNow
-4. **resolve_incident** - Resolve an incident in ServiceNow
-5. **list_incidents** - List incidents from ServiceNow
+1.  **create_incident** - Create a new incident in ServiceNow
+2.  **update_incident** - Update an existing incident in ServiceNow
+3.  **add_comment** - Add a comment to an incident in ServiceNow
+4.  **resolve_incident** - Resolve an incident in ServiceNow
+5.  **list_incidents** - List incidents from ServiceNow
 
-(The rest of the tool list from the original README can be kept here)
-...
+#### Request Management Tools (via `request_cli.py`)
+
+1.  **list_requests** - List requests (requested items) from ServiceNow
+2.  **count_requests** - Count requests (requested items) in ServiceNow
+
+#### User and Group Management Tools (via `user_cli.py`, `list_groups_cli.py`)
+
+1.  **create_user** - Create a new user in ServiceNow
+2.  **update_user** - Update an existing user in ServiceNow
+3.  **get_user** - Get a user from ServiceNow
+4.  **list_users** - List users from ServiceNow
+5.  **create_group** - Create a new group in ServiceNow
+6.  **update_group** - Update an existing group in ServiceNow
+7.  **add_group_members** - Add members to a group in ServiceNow
+8.  **remove_group_members** - Remove members from a group in ServiceNow
+9.  **list_groups** - List groups from ServiceNow
+10. **list_group_members** - List members of a group in ServiceNow
