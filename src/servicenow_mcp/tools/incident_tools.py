@@ -538,6 +538,7 @@ def list_incidents(
                 "assignment_group": assignment_group,
                 "category": incident_data.get("category"),
                 "subcategory": incident_data.get("subcategory"),
+                "u_record_producer": incident_data.get("u_record_producer"),
                 "created_on": incident_data.get("sys_created_on"),
                 "updated_on": incident_data.get("sys_updated_on"),
             }
