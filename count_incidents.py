@@ -1,8 +1,8 @@
 import os
 import argparse
 import json
+import requests
 from dotenv import load_dotenv
-from servicenow_mcp.tools.incident_tools import list_incidents, ListIncidentsParams
 from servicenow_mcp.utils.config import ServerConfig, AuthConfig, BasicAuthConfig, AuthType
 from servicenow_mcp.auth.auth_manager import AuthManager
 
@@ -16,15 +16,9 @@ STATE_MAP = {
 }
 
 def main():
-    parser = argparse.ArgumentParser(description="List ServiceNow incidents.")
-    parser.add_argument("--limit", type=int, default=10, help="Maximum number of incidents to return")
-    parser.add_argument("--offset", type=int, default=0, help="Offset for pagination")
-    parser.add_argument("--display-value", type=lambda x: (str(x).lower() == 'true'), default=True, help="Return display values for reference fields (default: True)")
-    parser.add_argument("--state", help="Filter by incident state ID")
-    parser.add_argument("--state-name", help="Filter by incident state display name")
-    parser.add_argument("--assigned-to", help="Filter by assigned user")
-    parser.add_argument("--category", help="Filter by category")
+    parser = argparse.ArgumentParser(description="Count ServiceNow incidents.")
     parser.add_argument("--query", help="A ServiceNow encoded query string for filtering incidents")
+    parser.add_argument("--state-name", help="Filter by incident state display name")
     args = parser.parse_args()
 
     load_dotenv()
@@ -50,27 +44,37 @@ def main():
 
     auth_manager = AuthManager(config.auth, config.instance_url)
 
-    query = args.query
-    state = args.state
-    if args.state_name:
+    api_url = f"{config.instance_url}/api/now/stats/incident"
+    
+    query_params = {
+        "sysparm_count": "true"
+    }
+
+    if args.query:
+        query_params["sysparm_query"] = args.query
+    elif args.state_name:
         if args.state_name in STATE_MAP:
-            state = STATE_MAP[args.state_name]
+            query_params["sysparm_query"] = f"state={STATE_MAP[args.state_name]}"
         else:
             print(f"Erro: Nome de estado inválido. Valores válidos: {list(STATE_MAP.keys())}")
             return
 
-    params = ListIncidentsParams(
-        limit=args.limit,
-        offset=args.offset,
-        display_value=args.display_value,
-        state=state,
-        assigned_to=args.assigned_to,
-        category=args.category,
-        query=query
-    )
-
-    result = list_incidents(config, auth_manager, params)
-    print(json.dumps(result, indent=2))
+    try:
+        response = requests.get(
+            api_url,
+            params=query_params,
+            headers=auth_manager.get_headers(),
+            timeout=config.timeout,
+        )
+        response.raise_for_status()
+        
+        data = response.json()
+        count = data.get("result", {}).get("stats", {}).get("count", 0)
+        
+        print(json.dumps({"success": True, "count": count}, indent=2))
+        
+    except requests.RequestException as e:
+        print(json.dumps({"success": False, "message": f"Failed to count incidents: {str(e)}"}, indent=2))
 
 if __name__ == "__main__":
     main()

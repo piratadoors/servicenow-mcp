@@ -522,6 +522,10 @@ def list_incidents(
             assigned_to = incident_data.get("assigned_to")
             if isinstance(assigned_to, dict):
                 assigned_to = assigned_to.get("display_value")
+
+            assignment_group = incident_data.get("assignment_group")
+            if isinstance(assignment_group, dict):
+                assignment_group = assignment_group.get("display_value")
             
             incident = {
                 "sys_id": incident_data.get("sys_id"),
@@ -531,6 +535,7 @@ def list_incidents(
                 "state": incident_data.get("state"),
                 "priority": incident_data.get("priority"),
                 "assigned_to": assigned_to,
+                "assignment_group": assignment_group,
                 "category": incident_data.get("category"),
                 "subcategory": incident_data.get("subcategory"),
                 "created_on": incident_data.get("sys_created_on"),
