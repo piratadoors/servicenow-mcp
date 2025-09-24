@@ -50,6 +50,8 @@ class UpdateIncidentParams(BaseModel):
     work_notes: Optional[str] = Field(None, description="Work notes to add to the incident")
     close_notes: Optional[str] = Field(None, description="Close notes to add to the incident")
     close_code: Optional[str] = Field(None, description="Close code for the incident")
+    u_type_of_solution: Optional[str] = Field(None, description="Solution type")
+    caller_id: Optional[str] = Field(None, description="User who reported the incident")
 
 
 class AddCommentParams(BaseModel):
@@ -253,6 +255,22 @@ def update_incident(
         data["close_notes"] = params.close_notes
     if params.close_code:
         data["close_code"] = params.close_code
+    if params.u_type_of_solution:
+        data["u_type_of_solution"] = params.u_type_of_solution
+    if params.caller_id:
+        data["caller_id"] = params.caller_id
+    if params.u_type_of_solution:
+        data["u_type_of_solution"] = params.u_type_of_solution
+    if params.caller_id:
+        data["caller_id"] = params.caller_id
+    if params.u_type_of_solution:
+        data["u_type_of_solution"] = params.u_type_of_solution
+    if params.caller_id:
+        data["caller_id"] = params.caller_id
+    if params.u_type_of_solution:
+        data["u_type_of_solution"] = params.u_type_of_solution
+    if params.caller_id:
+        data["caller_id"] = params.caller_id
 
     # Make request
     try:
@@ -461,6 +479,51 @@ def resolve_incident(
             success=False,
             message=f"Failed to resolve incident: {str(e)}",
         )
+
+def resolve_incident_with_all_fields(
+    config: ServerConfig,
+    auth_manager: AuthManager,
+    params: ResolveIncidentWithAllFieldsParams,
+) -> IncidentResponse:
+    """
+    Resolve an incident in ServiceNow with all fields.
+
+    Args:
+        config: Server configuration.
+        auth_manager: Authentication manager.
+        params: Parameters for resolving the incident.
+
+    Returns:
+        Response with the result of the operation.
+    """
+    # First, get the incident details to check if a caller_id is present
+    get_params = GetIncidentByNumberParams(incident_number=params.incident_id)
+    incident_details = get_incident_by_number(config, auth_manager, get_params)
+
+    if not incident_details.get("success"):
+        return IncidentResponse(
+            success=False,
+            message=f"Failed to get incident details: {incident_details.get('message')}",
+        )
+
+    incident = incident_details.get("incident")
+    caller_id = incident.get("caller_id")
+
+    # If caller_id is not present, use the one from the params
+    if not caller_id and params.caller_id:
+        caller_id = params.caller_id
+
+    update_params = UpdateIncidentParams(
+        incident_id=params.incident_id,
+        state="6",  # Resolved
+        close_code=params.resolution_code,
+        close_notes=params.resolution_notes,
+        u_type_of_solution=params.solution_type,
+        assigned_to=params.assigned_to,
+        caller_id=caller_id,
+    )
+
+    return update_incident(config, auth_manager, update_params)
 
 
 def list_incidents(
