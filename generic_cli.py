@@ -2,7 +2,7 @@ import os
 import argparse
 import json
 from dotenv import load_dotenv
-from servicenow_mcp.tools.generic_tools import get_table_record, GetTableRecordParams
+from servicenow_mcp.tools.generic_tools import get_table_record, query_table, GetTableRecordParams, QueryTableParams
 from servicenow_mcp.utils.config import ServerConfig, AuthConfig, BasicAuthConfig, AuthType
 from servicenow_mcp.auth.auth_manager import AuthManager
 
@@ -14,6 +14,11 @@ def main():
     record_parser = subparsers.add_parser("get-table-record", help="Get a record from a table.")
     record_parser.add_argument("--table-name", required=True, help="The name of the table.")
     record_parser.add_argument("--sys-id", required=True, help="The sys_id of the record.")
+
+    # Sub-parser for the 'query-table' command
+    query_parser = subparsers.add_parser("query-table", help="Query a table.")
+    query_parser.add_argument("--table-name", required=True, help="The name of the table.")
+    query_parser.add_argument("--query", required=True, help="The query to filter the records.")
 
     args = parser.parse_args()
 
@@ -43,6 +48,13 @@ def main():
             sys_id=args.sys_id,
         )
         result = get_table_record(config, auth_manager, params)
+        print(json.dumps(result, indent=2))
+    elif args.command == "query-table":
+        params = QueryTableParams(
+            table_name=args.table_name,
+            query=args.query,
+        )
+        result = query_table(config, auth_manager, params)
         print(json.dumps(result, indent=2))
 
 if __name__ == "__main__":
