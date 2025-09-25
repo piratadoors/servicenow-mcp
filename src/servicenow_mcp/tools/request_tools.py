@@ -26,6 +26,46 @@ class CountRequestsParams(BaseModel):
     """Parameters for counting requests."""
     query: Optional[str] = Field(None, description="A ServiceNow encoded query string for filtering requests.")
 
+class UpdateRequestParams(BaseModel):
+    """Parameters for updating a request."""
+    request_id: str = Field(..., description="Request ID or sys_id")
+    assigned_to: Optional[str] = Field(None, description="User assigned to the request")
+
+def update_request(
+    config: ServerConfig,
+    auth_manager: AuthManager,
+    params: UpdateRequestParams,
+) -> dict:
+    """
+    Update an existing request in ServiceNow.
+    """
+    api_url = f"{config.api_url}/table/sc_req_item/{params.request_id}"
+
+    data = {}
+    if params.assigned_to:
+        data["assigned_to"] = params.assigned_to
+
+    try:
+        response = requests.put(
+            api_url,
+            json=data,
+            headers=auth_manager.get_headers(),
+            timeout=config.timeout,
+        )
+        response.raise_for_status()
+        result = response.json().get("result", {})
+        return {
+            "success": True,
+            "message": "Request updated successfully",
+            "request": result,
+        }
+    except requests.RequestException as e:
+        logger.error(f"Failed to update request: {e}")
+        return {
+            "success": False,
+            "message": f"Failed to update request: {str(e)}",
+        }
+
 def list_requests(
     config: ServerConfig,
     auth_manager: AuthManager,

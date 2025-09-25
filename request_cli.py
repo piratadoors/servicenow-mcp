@@ -3,7 +3,7 @@ import os
 import argparse
 import json
 from dotenv import load_dotenv
-from servicenow_mcp.tools.request_tools import list_requests, count_requests, ListRequestsParams, CountRequestsParams
+from servicenow_mcp.tools.request_tools import list_requests, count_requests, update_request, ListRequestsParams, CountRequestsParams, UpdateRequestParams
 from servicenow_mcp.utils.config import ServerConfig, AuthConfig, BasicAuthConfig, AuthType
 from servicenow_mcp.auth.auth_manager import AuthManager
 
@@ -21,6 +21,11 @@ def main():
     # Sub-parser for the 'count' command
     count_parser = subparsers.add_parser("count", help="Count ServiceNow requests.")
     count_parser.add_argument("--query", help="A ServiceNow encoded query string for filtering requests")
+
+    # Sub-parser for the 'update' command
+    update_parser = subparsers.add_parser("update", help="Update a ServiceNow request.")
+    update_parser.add_argument("--request-id", required=True, help="The sys_id of the request to update.")
+    update_parser.add_argument("--assigned-to", help="The email or username of the user to assign the request to.")
 
     args = parser.parse_args()
 
@@ -56,6 +61,13 @@ def main():
     elif args.command == "count":
         params = CountRequestsParams(query=args.query)
         result = count_requests(config, auth_manager, params)
+        print(json.dumps(result, indent=2))
+    elif args.command == "update":
+        params = UpdateRequestParams(
+            request_id=args.request_id,
+            assigned_to=args.assigned_to
+        )
+        result = update_request(config, auth_manager, params)
         print(json.dumps(result, indent=2))
 
 if __name__ == "__main__":
