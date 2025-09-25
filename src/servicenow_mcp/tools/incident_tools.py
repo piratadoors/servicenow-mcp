@@ -54,6 +54,17 @@ class UpdateIncidentParams(BaseModel):
     caller_id: Optional[str] = Field(None, description="User who reported the incident")
 
 
+class ResolveIncidentWithAllFieldsParams(BaseModel):
+    """Parameters for resolving an incident with all fields."""
+
+    incident_id: str = Field(..., description="Incident ID or sys_id")
+    resolution_code: str = Field(..., description="Resolution code for the incident")
+    resolution_notes: str = Field(..., description="Resolution notes for the incident")
+    solution_type: str = Field(..., description="Solution type")
+    assigned_to: Optional[str] = Field(None, description="User assigned to the incident")
+    caller_id: Optional[str] = Field(None, description="User who reported the incident")
+
+
 class AddCommentParams(BaseModel):
     """Parameters for adding a comment to an incident."""
 
