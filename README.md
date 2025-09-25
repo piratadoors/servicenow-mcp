@@ -150,3 +150,266 @@ You can create new client scripts for any of the available tools listed later in
 8.  **remove_group_members** - Remove members from a group in ServiceNow
 9.  **list_groups** - List groups from ServiceNow
 10. **list_group_members** - List members of a group in ServiceNow
+
+## CLI Tool Reference
+
+This section provides a detailed reference for each of the command-line interface (CLI) scripts available in this project.
+
+### `run_list_incidents.py`
+
+```
+usage: run_list_incidents.py [-h] [--limit LIMIT] [--offset OFFSET]
+                             [--display-value DISPLAY_VALUE] [--state STATE]
+                             [--state-name STATE_NAME]
+                             [--assigned-to ASSIGNED_TO] [--category CATEGORY]
+                             [--query QUERY]
+
+List ServiceNow incidents.
+
+options:
+  -h, --help            show this help message and exit
+  --limit LIMIT         Maximum number of incidents to return
+  --offset OFFSET       Offset for pagination
+  --display-value DISPLAY_VALUE
+                        Return display values for reference fields (default:
+                        True)
+  --state STATE         Filter by incident state ID
+  --state-name STATE_NAME
+                        Filter by incident state display name
+  --assigned-to ASSIGNED_TO
+                        Filter by assigned user
+  --category CATEGORY   Filter by category
+  --query QUERY         A ServiceNow encoded query string for filtering
+                        incidents
+```
+
+### `create_incident_cli.py`
+
+```
+usage: create_incident_cli.py [-h] --short-description SHORT_DESCRIPTION
+                              [--description DESCRIPTION]
+                              [--caller-id CALLER_ID] [--opened-by OPENED_BY]
+                              [--sc-cat-item-producer SC_CAT_ITEM_PRODUCER]
+                              [--category CATEGORY]
+                              [--subcategory SUBCATEGORY]
+                              [--priority PRIORITY] [--impact IMPACT]
+                              [--urgency URGENCY] [--assigned-to ASSIGNED_TO]
+                              [--assignment-group ASSIGNMENT_GROUP]
+
+Create a ServiceNow incident.
+
+options:
+  -h, --help            show this help message and exit
+  --short-description SHORT_DESCRIPTION
+                        Short description of the incident
+  --description DESCRIPTION
+                        Detailed description of the incident
+  --caller-id CALLER_ID
+                        User who reported the incident
+  --opened-by OPENED_BY
+                        User who opened the incident
+  --sc-cat-item-producer SC_CAT_ITEM_PRODUCER
+                        Service catalog item producer
+  --category CATEGORY   Category of the incident
+  --subcategory SUBCATEGORY
+                        Subcategory of the incident
+  --priority PRIORITY   Priority of the incident
+  --impact IMPACT       Impact of the incident
+  --urgency URGENCY     Urgency of the incident
+  --assigned-to ASSIGNED_TO
+                        User assigned to the incident
+  --assignment-group ASSIGNMENT_GROUP
+                        Group assigned to the incident
+```
+
+### `request_cli.py`
+
+```
+usage: request_cli.py [-h] {list,count} ...
+
+ServiceNow Request CLI
+
+positional arguments:
+  {list,count}
+    list        List ServiceNow requests.
+    count       Count ServiceNow requests.
+
+options:
+  -h, --help    show this help message and exit
+```
+
+#### `request_cli.py list`
+
+```
+usage: request_cli.py list [-h] [--limit LIMIT] [--offset OFFSET]
+                           [--display-value DISPLAY_VALUE] [--query QUERY]
+
+options:
+  -h, --help            show this help message and exit
+  --limit LIMIT         Maximum number of requests to return
+  --offset OFFSET       Offset for pagination
+  --display-value DISPLAY_VALUE
+                        Return display values for reference fields (default:
+                        True)
+  --query QUERY         A ServiceNow encoded query string for filtering
+                        requests
+```
+
+#### `request_cli.py count`
+
+```
+usage: request_cli.py count [-h] [--query QUERY]
+
+options:
+  -h, --help     show this help message and exit
+  --query QUERY  A ServiceNow encoded query string for filtering requests
+```
+
+### `user_cli.py`
+
+```
+usage: user_cli.py [-h]
+                   {get-user,add-group-member,list-users,list-groups,list-group-members}
+                   ...
+
+ServiceNow User and Group CLI
+
+positional arguments:
+  {get-user,add-group-member,list-users,list-groups,list-group-members}
+    get-user            Get details of a ServiceNow user.
+    add-group-member    Add a user to a ServiceNow group.
+    list-users          List ServiceNow users.
+    list-groups         List ServiceNow groups.
+    list-group-members  List members of a ServiceNow group.
+
+options:
+  -h, --help            show this help message and exit
+```
+
+#### `user_cli.py get-user`
+
+```
+usage: user_cli.py get-user [-h] [--email EMAIL] [--user-name USER_NAME]
+                            [--user-id USER_ID]
+
+options:
+  -h, --help            show this help message and exit
+  --email EMAIL         Email address of the user
+  --user-name USER_NAME
+                        Username of the user
+  --user-id USER_ID     Sys_id of the user
+```
+
+#### `user_cli.py add-group-member`
+
+```
+usage: user_cli.py add-group-member [-h] --group-id GROUP_ID --member MEMBER
+
+options:
+  -h, --help           show this help message and exit
+  --group-id GROUP_ID  The name or sys_id of the group
+  --member MEMBER      The email or username of the user to add
+```
+
+#### `user_cli.py list-users`
+
+```
+usage: user_cli.py list-users [-h] [--limit LIMIT] [--offset OFFSET]
+                              [--active ACTIVE] [--department DEPARTMENT]
+                              [--query QUERY]
+
+options:
+  -h, --help            show this help message and exit
+  --limit LIMIT         Maximum number of users to return
+  --offset OFFSET       Offset for pagination
+  --active ACTIVE       Filter by active status
+  --department DEPARTMENT
+                        Filter by department
+  --query QUERY         Case-insensitive search term that matches against
+                        name, username, or email fields.
+```
+
+#### `user_cli.py list-groups`
+
+```
+usage: user_cli.py list-groups [-h] [--limit LIMIT] [--offset OFFSET]
+                               [--active ACTIVE] [--query QUERY] [--type TYPE]
+
+options:
+  -h, --help       show this help message and exit
+  --limit LIMIT    Maximum number of groups to return
+  --offset OFFSET  Offset for pagination
+  --active ACTIVE  Filter by active status
+  --query QUERY    Case-insensitive search term that matches against group
+                   name or description fields.
+  --type TYPE      Filter by group type
+```
+
+#### `user_cli.py list-group-members`
+
+```
+usage: user_cli.py list-group-members [-h] --group-id GROUP_ID [--limit LIMIT]
+                                      [--offset OFFSET]
+
+options:
+  -h, --help           show this help message and exit
+  --group-id GROUP_ID  The name or sys_id of the group
+  --limit LIMIT        Maximum number of members to return
+  --offset OFFSET      Offset for pagination
+```
+
+### `list_groups_cli.py`
+
+```
+usage: list_groups_cli.py [-h] [--limit LIMIT] [--offset OFFSET]
+                          [--active ACTIVE] [--query QUERY] [--type TYPE]
+
+List ServiceNow groups.
+
+options:
+  -h, --help       show this help message and exit
+  --limit LIMIT    Maximum number of groups to return
+  --offset OFFSET  Offset for pagination
+  --active ACTIVE  Filter by active status
+  --query QUERY    A ServiceNow encoded query string for filtering groups
+  --type TYPE      Filter by group type
+```
+
+### `resolve_incident_cli.py`
+
+```
+usage: resolve_incident_cli.py [-h] --number NUMBER --resolution-code
+                               RESOLUTION_CODE --resolution-notes
+                               RESOLUTION_NOTES --solution-type SOLUTION_TYPE
+                               [--assignee ASSIGNEE] [--caller-id CALLER_ID]
+
+Resolve a ServiceNow incident with all fields.
+
+options:
+  -h, --help            show this help message and exit
+  --number NUMBER       Incident number
+  --resolution-code RESOLUTION_CODE
+                        Resolution code
+  --resolution-notes RESOLUTION_NOTES
+                        Resolution notes
+  --solution-type SOLUTION_TYPE
+                        Solution type
+  --assignee ASSIGNEE   Assignee email
+  --caller-id CALLER_ID
+                        Caller ID
+```
+
+### `count_incidents.py`
+
+```
+usage: count_incidents.py [-h] [--query QUERY] [--state-name STATE_NAME]
+
+Count ServiceNow incidents.
+
+options:
+  -h, --help            show this help message and exit
+  --query QUERY         A ServiceNow encoded query string for filtering
+                        incidents
+  --state-name STATE_NAME
+                        Filter by incident state display name
+```
