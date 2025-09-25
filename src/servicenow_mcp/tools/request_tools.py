@@ -67,6 +67,7 @@ def list_requests(
                 "sys_id": req_data.get("sys_id"),
                 "number": req_data.get("number"),
                 "short_description": req_data.get("short_description"),
+                "description": req_data.get("description"),
                 "state": req_data.get("state"),
                 "assignment_group": assignment_group,
                 "created_on": req_data.get("sys_created_on"),
