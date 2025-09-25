@@ -30,6 +30,9 @@ class UpdateRequestParams(BaseModel):
     """Parameters for updating a request."""
     request_id: str = Field(..., description="Request ID or sys_id")
     assigned_to: Optional[str] = Field(None, description="User assigned to the request")
+    state: Optional[str] = Field(None, description="State of the request")
+    close_notes: Optional[str] = Field(None, description="Closure notes for the request")
+    u_close_code: Optional[str] = Field(None, description="Closure code for the request")
 
 def update_request(
     config: ServerConfig,
@@ -44,6 +47,12 @@ def update_request(
     data = {}
     if params.assigned_to:
         data["assigned_to"] = params.assigned_to
+    if params.state:
+        data["state"] = params.state
+    if params.close_notes:
+        data["close_notes"] = params.close_notes
+    if params.u_close_code:
+        data["u_close_code"] = params.u_close_code
 
     try:
         response = requests.put(
@@ -103,17 +112,7 @@ def list_requests(
             if isinstance(assignment_group, dict):
                 assignment_group = assignment_group.get("display_value")
             
-            request = {
-                "sys_id": req_data.get("sys_id"),
-                "number": req_data.get("number"),
-                "short_description": req_data.get("short_description"),
-                "description": req_data.get("description"),
-                "state": req_data.get("state"),
-                "assignment_group": assignment_group,
-                "created_on": req_data.get("sys_created_on"),
-                "updated_on": req_data.get("sys_updated_on"),
-            }
-            requests_list.append(request)
+            requests_list.append(req_data)
         
         return {
             "success": True,

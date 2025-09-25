@@ -26,6 +26,9 @@ def main():
     update_parser = subparsers.add_parser("update", help="Update a ServiceNow request.")
     update_parser.add_argument("--request-id", required=True, help="The sys_id of the request to update.")
     update_parser.add_argument("--assigned-to", help="The email or username of the user to assign the request to.")
+    update_parser.add_argument("--state", help="The state of the request.")
+    update_parser.add_argument("--close-notes", help="The closure notes for the request.")
+    update_parser.add_argument("--u-close-code", help="The closure code for the request.")
 
     args = parser.parse_args()
 
@@ -65,7 +68,10 @@ def main():
     elif args.command == "update":
         params = UpdateRequestParams(
             request_id=args.request_id,
-            assigned_to=args.assigned_to
+            assigned_to=args.assigned_to,
+            state=args.state,
+            close_notes=args.close_notes,
+            u_close_code=args.u_close_code
         )
         result = update_request(config, auth_manager, params)
         print(json.dumps(result, indent=2))
